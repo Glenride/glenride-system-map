@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Glenride System Map</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="config.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div>
+        <p class="kicker">Glenride · Internal</p>
+        <h1>Glenride System Map</h1>
+        <p class="premise" id="premise">Loading…</p>
+      </div>
+      <button id="logoutBtn" class="btn ghost hidden" type="button">Sign out</button>
+    </header>
+
+    <section id="loginView" class="card login hidden">
+      <h2>Sign in</h2>
+      <p class="muted">The system map is internal — org structure and budgets. Enter the password to continue.</p>
+      <form id="loginForm">
+        <label>Password
+          <input id="passwordInput" type="password" autocomplete="current-password" required />
+        </label>
+        <button class="btn primary" type="submit">Sign in</button>
+        <p id="loginError" class="error hidden"></p>
+      </form>
+    </section>
+
+    <div id="appView" class="hidden">
+      <section class="card">
+        <div class="section-head">
+          <h2>Organization</h2>
+          <button class="btn small" type="button" data-edit-org>Edit</button>
+        </div>
+        <div class="org-grid">
+          <div>
+            <h3>Now — <span id="orgCurrentTitle"></span></h3>
+            <p id="orgCurrentBody"></p>
+          </div>
+          <div>
+            <h3>Next — <span id="orgFutureTitle"></span></h3>
+            <p id="orgFutureBody"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Chain of authority</h2>
+        <ol id="hierarchyList" class="hierarchy"></ol>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Departments <span id="deptCount" class="count"></span></h2>
+          <button id="addDeptBtn" class="btn small primary" type="button">+ Add department</button>
+        </div>
+        <div id="deptGrid" class="dept-grid"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Budget flow <span id="stageCount" class="count"></span></h2>
+        </div>
+        <ol id="stageList" class="stages"></ol>
+      </section>
+
+      <footer class="foot">
+        <p>Internal — Glenride operating structure. Also on this subdomain:
+        <a href="free-will-machine.html">The Free-Will Machine</a>, a separate interactive
+        study (9 mechanisms, 12 relations, 15 project forecasts) from the earlier
+        <code>system-map</code> export, re-hosted here as-is.</p>
+      </footer>
+    </div>
+
+    <dialog id="editDialog">
+      <form id="editForm" method="dialog">
+        <h2 id="editTitle">Edit</h2>
+        <div id="editFields"></div>
+        <div class="dialog-actions">
+          <button class="btn ghost" type="button" id="editCancel">Cancel</button>
+          <button class="btn primary" type="submit" id="editSave">Save</button>
+        </div>
+        <p id="editError" class="error hidden"></p>
+      </form>
+    </dialog>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

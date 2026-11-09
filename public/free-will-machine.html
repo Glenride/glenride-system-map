@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>The Free-Will Machine</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Franklin:wght@400;500;600;700&display=swap');
+    :root{
+      color-scheme:light dark;
+      --bg:#f1efe8;--paper:#fbfaf6;--ink:#182026;--muted:#5c6669;--line:#b8b7ae;
+      --strong:#202a2f;--accent:#a64b32;--accent-soft:#f0d8cf;--blue:#2d5967;--blue-soft:#dce8e9;
+      --olive:#5f6745;--olive-soft:#e6e8d8;--gold:#8a6427;--gold-soft:#eee1c5;--focus:#fff;
+      --shadow:0 16px 38px rgba(24,32,38,.10);
+    }
+    @media (prefers-color-scheme:dark){:root{
+      --bg:#0f1417;--paper:#161d21;--ink:#eef1ed;--muted:#abb5b5;--line:#465156;
+      --strong:#f2f4ef;--accent:#e07c5d;--accent-soft:#482c27;--blue:#8fb9c2;--blue-soft:#21363b;
+      --olive:#bac58d;--olive-soft:#303626;--gold:#e2bd72;--gold-soft:#3d3322;--focus:#111719;
+      --shadow:0 18px 44px rgba(0,0,0,.28);
+    }}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Libre Franklin",sans-serif;min-height:100vh}
+    button{font:inherit;color:inherit}
+    .page{max-width:1480px;margin:0 auto;padding:clamp(22px,4vw,56px)}
+    .intro{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);gap:32px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:28px}
+    .serial{font:600 12px/1.4 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+    h1{font-size:clamp(38px,6vw,80px);line-height:.94;letter-spacing:-.055em;margin:0;max-width:900px;font-weight:700}
+    .gloss{font-size:clamp(16px,1.55vw,21px);line-height:1.58;margin:0;color:var(--muted);max-width:600px}
+    .summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+    .summary span{font:500 12px/1 "IBM Plex Mono",monospace;border:1px solid var(--line);padding:9px 11px;background:var(--paper)}
+    .workspace{display:grid;grid-template-columns:minmax(620px,1.55fr) minmax(330px,.72fr);gap:24px;padding-top:24px;align-items:start}
+    .map-shell{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);min-width:0}
+    .map-head{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line)}
+    .map-head strong{font:600 13px/1.3 "IBM Plex Mono",monospace;letter-spacing:.04em}
+    .legend{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:12px;flex-wrap:wrap;justify-content:flex-end}
+    .legend span{display:flex;align-items:center;gap:6px}
+    .swatch{width:24px;height:0;border-top:2px solid var(--accent)}
+    .swatch.dashed{border-top-style:dashed;border-color:var(--muted)}
+    .diagram-wrap{position:relative;min-height:680px;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px;background-position:-1px -1px;overflow:hidden}
+    .diagram-wrap::after{content:"SYSTEM / 01";position:absolute;right:14px;bottom:12px;color:var(--muted);font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;opacity:.6}
+    svg{display:block;width:100%;height:680px;position:relative;z-index:1}
+    .edge-path{fill:none;stroke:var(--line);stroke-width:1.35;marker-end:url(#arrow);transition:stroke .15s,stroke-width .15s}
+    .edge-path.core{stroke:var(--accent);stroke-width:2.2}
+    .edge-path.interpretive{stroke-dasharray:7 5}
+    .edge-hit{fill:none;stroke:transparent;stroke-width:18;cursor:pointer}
+    .edge-group:hover .edge-path,.edge-group.active .edge-path{stroke:var(--blue);stroke-width:3}
+    .edge-label rect{fill:var(--paper);stroke:var(--line);rx:2}
+    .edge-label text{font:500 10px "IBM Plex Mono",monospace;fill:var(--muted);text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+    .edge-group.core .edge-label rect{stroke:var(--accent)}
+    .edge-group.core .edge-label text{fill:var(--accent)}
+    .edge-label{cursor:pointer}
+    .node{cursor:pointer;outline:none}
+    .node rect{fill:var(--paper);stroke:var(--strong);stroke-width:1.25;rx:4;transition:fill .15s,stroke .15s,stroke-width .15s}
+    .node .index{font:600 9px "IBM Plex Mono",monospace;fill:var(--muted);letter-spacing:.08em}
+    .node .name{font:600 13px "Libre Franklin",sans-serif;fill:var(--ink)}
+    .node:hover rect,.node.active rect,.node:focus rect{fill:var(--blue-soft);stroke:var(--blue);stroke-width:2.5}
+    .node.core rect{stroke:var(--accent);stroke-width:2}
+    .node.core .index{fill:var(--accent)}
+    .hub-ring{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:3 6;opacity:.6}
+    .hub-title{font:600 9px "IBM Plex Mono",monospace;fill:var(--accent);letter-spacing:.14em;text-anchor:middle}
+    .panel{background:var(--paper);border:1px solid var(--line);min-height:680px;position:sticky;top:18px;display:flex;flex-direction:column}
+    .panel-nav{display:flex;border-bottom:1px solid var(--line)}
+    .panel-nav button{border:0;background:transparent;padding:15px 16px;cursor:pointer;font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;color:var(--muted)}
+    .panel-nav button:hover,.panel-nav button:focus{background:var(--blue-soft);color:var(--ink);outline:none}
+    .detail{padding:clamp(22px,3vw,36px);overflow:auto;max-height:calc(100vh - 60px)}
+    .detail-index{font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+    .detail h2{font-size:clamp(28px,3vw,43px);line-height:1.02;letter-spacing:-.04em;margin:0 0 20px}
+    .essence{font-size:17px;line-height:1.62;margin:0 0 28px;color:var(--ink)}
+    .rule{height:1px;background:var(--line);margin:24px 0}
+    .detail h3{font:600 11px/1.4 "IBM Plex Mono",monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+    .evidence{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+    .evidence li{display:grid;grid-template-columns:88px 1fr;gap:13px;align-items:start}
+    .date{font:500 10px/1.45 "IBM Plex Mono",monospace;color:var(--accent);padding-top:2px}
+    .quote{font-size:13px;line-height:1.6;color:var(--muted)}
+    .edge-note{border-top:3px solid var(--blue);padding-top:18px;font-size:16px;line-height:1.65;color:var(--ink)}
+    .caveat{margin-top:20px;background:var(--gold-soft);color:var(--ink);padding:13px 14px;font-size:12px;line-height:1.5;border:1px solid var(--gold)}
+    .mechanism-list{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
+    .mechanism-list button{border:0;background:var(--paper);text-align:left;padding:17px;cursor:pointer;min-height:92px}
+    .mechanism-list button:hover,.mechanism-list button:focus{background:var(--blue-soft);outline:none}
+    .mechanism-list b{display:block;font-size:13px;line-height:1.25;margin-bottom:7px}
+    .mechanism-list small{font:500 10px/1.3 "IBM Plex Mono",monospace;color:var(--muted)}
+    .footer-note{color:var(--muted);font-size:12px;line-height:1.55;margin:18px 2px 0}
+    .project-tray{display:none;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--blue-soft);gap:7px;flex-wrap:wrap}
+    .project-tray.active{display:flex}
+    .project-chip{border:1px solid var(--line);background:var(--paper);padding:8px 10px;cursor:pointer;font:600 10px/1.2 "IBM Plex Mono",monospace;text-align:left}
+    .project-chip:hover,.project-chip:focus,.project-chip.active{background:var(--accent-soft);border-color:var(--accent);outline:none}
+    .node.project-dim{opacity:.3}.node.project-match rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
+    .project-badge{fill:var(--accent);stroke:var(--paper);stroke-width:2}.project-badge-text{font:600 8px "IBM Plex Mono",monospace;fill:var(--focus);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+    .portfolio{margin-top:28px;border-top:1px solid var(--line);padding-top:28px}
+    .portfolio-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.65fr);gap:28px;align-items:end;margin-bottom:20px}
+    .portfolio h2{font-size:clamp(30px,4vw,52px);letter-spacing:-.045em;line-height:1;margin:0 0 10px}
+    .portfolio-intro{margin:0;color:var(--muted);font-size:15px;line-height:1.58;max-width:720px}
+    .forecast-rule{border:1px solid var(--gold);background:var(--gold-soft);padding:14px 16px;font-size:12px;line-height:1.55}
+    .portfolio-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+    .project-card{border:0;background:var(--paper);padding:18px;text-align:left;cursor:pointer;min-height:190px;display:flex;flex-direction:column}
+    .project-card:hover,.project-card:focus{background:var(--blue-soft);outline:none}
+    .project-card .phase{font:600 9px/1.25 "IBM Plex Mono",monospace;letter-spacing:.09em;color:var(--accent);text-transform:uppercase}
+    .project-card h3{font-size:18px;line-height:1.2;margin:12px 0 8px}.project-card p{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 15px}
+    .project-card .target{margin-top:auto;border-top:1px solid var(--line);padding-top:11px;display:flex;justify-content:space-between;gap:10px;font:600 10px/1.35 "IBM Plex Mono",monospace}
+    .project-card .target span:last-child{color:var(--blue);text-align:right}
+    .project-card.unscheduled .target span:last-child{color:var(--gold)}
+    .project-facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:20px 0}
+    .project-facts div{background:var(--paper);padding:12px}.project-facts small{display:block;font:600 9px/1.3 "IBM Plex Mono",monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}.project-facts b{font-size:13px;line-height:1.35}
+    .detail-list{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6}.detail-list li+li{margin-top:7px}.mechanism-tags{display:flex;gap:6px;flex-wrap:wrap}.mechanism-tags span{font:600 9px/1 "IBM Plex Mono",monospace;padding:7px 8px;border:1px solid var(--line);background:var(--blue-soft)}
+    @media(max-width:1040px){
+      .intro{grid-template-columns:1fr}.gloss{max-width:850px}
+      .workspace{grid-template-columns:1fr}.panel{position:static;min-height:0}.detail{max-height:none}
+      .diagram-wrap,svg{height:650px}.mechanism-list{grid-template-columns:repeat(3,1fr)}
+      .portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-head{grid-template-columns:1fr}
+    }
+    @media(max-width:680px){
+      .page{padding:18px 12px 32px}.intro{gap:18px;padding:14px 4px 24px}h1{font-size:44px}.gloss{font-size:15px}
+      .workspace{gap:14px;padding-top:14px}.map-head{align-items:flex-start;flex-direction:column;gap:10px}.legend{justify-content:flex-start}
+      .diagram-wrap,svg{height:920px}.diagram-wrap{background-size:28px 28px}
+      .panel-nav button{flex:1}.detail{padding:24px 19px}.detail h2{font-size:31px}.essence{font-size:15px}
+      .evidence li{grid-template-columns:1fr;gap:4px}.mechanism-list{grid-template-columns:1fr 1fr}.mechanism-list button{min-height:82px;padding:14px}
+      .project-tray{padding:10px}.project-chip{width:calc(50% - 4px)}.portfolio{margin-top:22px;padding-top:22px}.portfolio-grid{grid-template-columns:1fr}.project-card{min-height:0}.project-facts{grid-template-columns:1fr}.portfolio-head{gap:14px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="intro">
+    <div>
+      <p class="serial">Architecture study · 29 Sep—05 Oct 2026</p>
+      <h1>The Free-Will Machine</h1>
+      <div class="summary" aria-label="System summary"><span>09 mechanisms</span><span>12 relations</span><span>15 project forecasts</span><span>03 provisional</span></div>
+    </div>
+    <p class="gloss">An operating system for building powerful AI machinery that can never override the humans it serves — now overlaid with the portfolio it is meant to carry and a realistic solo-founder sequence.</p>
+  </header>
+
+  <section class="workspace" aria-label="Interactive system map">
+    <div class="map-shell">
+      <div class="map-head">
+        <strong>RELATIONSHIP SCHEMATIC + PROJECT OVERLAY</strong>
+        <div class="legend"><span><i class="swatch"></i> core loop</span><span><i class="swatch dashed"></i> interpretive link</span><span>tap any node, relation, or project</span></div>
+      </div>
+      <div class="project-tray" id="projectTray" aria-label="Project overlay"></div>
+      <div class="diagram-wrap">
+        <svg id="diagram" viewBox="0 0 920 700" role="img" aria-labelledby="mapTitle mapDesc">
+          <title id="mapTitle">The Free-Will Machine system map</title>
+          <desc id="mapDesc">Nine connected mechanisms. Words, consent and human approval form the core closed loop.</desc>
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0 0 L8 4 L0 8 z" fill="context-stroke"></path></marker>
+          </defs>
+          <g id="edges"></g><g id="hub"></g><g id="nodes"></g>
+        </svg>
+      </div>
+    </div>
+
+    <aside class="panel" aria-live="polite">
+      <div class="panel-nav"><button id="overviewBtn" type="button">SYSTEM</button><button id="projectsBtn" type="button">PROJECT OVERLAY</button><button id="nextBtn" type="button">NEXT →</button></div>
+      <div class="detail" id="detail"></div>
+    </aside>
+  </section>
+
+  <section class="portfolio" aria-labelledby="portfolioTitle">
+    <div class="portfolio-head">
+      <div><p class="serial">Execution sequence · forecast from 05 Oct 2026</p><h2 id="portfolioTitle">The portfolio, in build order</h2><p class="portfolio-intro">“Complete” means the named ship-worthy milestone, not that the venture stops evolving. Tap a project for its current state, next moves, dependencies, and the mechanisms it exercises.</p></div>
+      <div class="forecast-rule"><strong>Planning model, not a promise.</strong> The dates assume one primary build plus one lighter track at a time. AI agents accelerate research, drafting, coding, and QA; founder decisions, integration, live testing, legal review, and partner approvals remain the critical path. Any major scope change moves the date.</div>
+    </div>
+    <div class="portfolio-grid" id="portfolioGrid" aria-label="Project completion forecast"></div>
+  </section>
+
+  <nav class="mechanism-list" id="mechanismList" aria-label="All mechanisms"></nav>
+  <p class="footer-note">The dashed “demands” relation is an analyst’s synthesis rather than a stated rationale. Project dates are scenario estimates based on the recorded scope and dependencies as of 5 October 2026. The three very-low-confidence forecasts are conditional on their stated provisional v1 boundaries.</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  var nodes=[
+    {id:'spells',name:'Words Are Spells',essence:'Language is not description but action: every word is a spell that programs speaker and listener. He chooses words with precision of intent and refuses to carry anyone else\'s framing in his mouth.',evidence:[['2026-09-29','First meeting: on “peace” — “If you put up a peace sign... fingers are not together they are apart... we need more wholeness. We need to complete things not piecemeal them.” And: the words you say into yourself “are true magic spells.”'],['2026-10-02','Hard word rules locked for the brand: never “sovereign” (sovereign-citizen baggage — use “independent”), never “humanist” (cold materialism — use “Human Primacy”).'],['2026-10-04','Euphemism refined from “euphemisms are lying” to precision of intent: “someone else\'s spell cast with your mouth that you never opted in is a curse.”'],['2026-10-02/03','SpinWave v2.4 purges ALL economic framing — even negating pay/price still centers it. Reynard rule: the fox is implied, never quoted (“Outwit the tower” rejected as odd).']]},
+    {id:'verify',name:'Verify Before Asserting',essence:'A confident wrong answer is a lie. Technical and factual claims must be checked against a live source before being stated; when something cannot be verified, say so plainly.',evidence:[['2026-10-04','After two wild-goose chases (nonexistent Lenovo driver categories; incomplete Fast Startup path), he established the standing CYA rule and had it written into SOUL.md and MEMORY.md: “cover your ass” — check with a live tool even when tedious.'],['2026-10-02','Corrected the assistant\'s false SPIN claims with a Base RPC trace: 85B SPIN in the Uniswap V4 pool paired with wrapped TAO, 15B vesting reserve. Refused to let unverified claims stand.'],['2026-10-02/04','Thesis and Borrowed Spell sources must not be presented as substantiated without real citations — 110 sources gathered with explicit DOI-pass caveats; the drug digest marks totals stale rather than guessing.']]},
+    {id:'human-gate',name:'Approval-First, Human in the Loop',essence:'The machine proposes; the human disposes. No system he builds may move money, publish, or act in the world without his explicit go-ahead at the consequential step.',evidence:[['2026-10-01/02','Launch Agent PRD hard boundaries: no custody or private-key storage, no autonomous money movement, no automatic publishing, human approval gates, informational-only treasury monitoring.'],['2026-10-02','Content factory approval gate is mandatory — every clip lands in an approve/edit/reject queue; Phase A stops at approved renders and never posts to platforms.'],['2026-10-02','WAVY life-ops executes real-money outcomes only after one confirmation, allowlisted exits only; the Launch Freeze Board: ticking a box “only records a frozen decision, cannot publish/sign/deploy/move money.”']]},
+    {id:'own-ground',name:'Own the Infrastructure',essence:'Build on ground you control — self-hosted hardware, owned code, his accounts and domains. Rent only tactically, and never mistake rented ground for the institution.',evidence:[['2026-10-02','Homelab: 2017 iMac on Omarchy + Mac Studio serving models over LAN; wants to self-host Ntfy/crawl4ai/Postal. Content factory runs a $0/month local stack on his own hardware.'],['2026-10-02','Warm outbound must be “standalone technology he owns, not a skill dependent on superagnt” (v2.0); revised to hybrid only where vendor APIs materially reduce ban risk, behind swappable adapters.'],['2026-10-02','Conference anecdote correction: Webflow was tactical renting for a deadline — the lesson is never mistaking rented infrastructure for the institution. Professional identity locked as “The Independent Architect.”']]},
+    {id:'provenance',name:'Own the Work (Provenance)',essence:'Only build on work that is his or properly licensed. Never scrape, steal, repost, or reinterpret someone else\'s content, brand, or creative work.',evidence:[['2026-10-02','Content factory pointed only at his own archive — the viral tweet\'s version (clipping others\' channels) is infringement killed by platform originality rules; per-account re-cut, never identical re-posts.'],['2026-10-03','Rejected the assistant\'s redrawn fox icon: “It\'s too different from the original. Omit.” His sketch IS the mark; his line-art is the only sanctioned small version. Adopt his creative work exactly, never reinterpret it.'],['2026-10-02','Proposed source_license provenance field for SPIN clips (owned/licensed/permission) — clips without provenance cannot enter the queue; WAVY\'s named partner surface labeled illustrative until a real agreement exists.']]},
+    {id:'freeze',name:'Freeze It or Track It',essence:'Ambiguity is the enemy. Decisions are frozen in versioned documents with zero unset lines; anything unresolved is explicitly tracked as an open item with a named owner — never left to drift.',evidence:[['2026-10-02','WAVY tokenomics v1.0 frozen with zero unset lines; Launch Freeze Board built — ticking a box records a frozen decision, nothing more.'],['2026-10-05','SpinWave gaming fork resolved (dropped — his call) and the frozen utility spec updated the same day; the dashboard tracks every workstream\'s “what is waiting on him.”'],['2026-10-02/05','SpinWave brand kit versioned v2.4 to v2.5; steering is instant and final (“Remove run with Reynard from the nav bar”); “nothing published until he approves.”']]},
+    {id:'consent',name:'Consent Is Architectural',essence:'Free will is not just belief but a design constraint: every consequential action requires explicit opt-in. No system moves on anyone\'s behalf — not users\', not his — without it.',evidence:[['2026-09-29','First meeting worldview: humans are “machines in a sense, endowed by God with free will to finish their life paths.”'],['2026-10-02','WAVY life-ops is consent-based: maps linked funds, executes real-money outcomes only after one confirmation, allowlisted exits only — not a loan, no custody.'],['2026-10-02/04','The AI must never create platform accounts — he creates them himself (ToS/ban risk). Unclaimed sweep: he enters sensitive details himself on official portals; each filing needs in-the-moment approval. He explicitly granted checkbox/CAPTCHA permission — consent extended even to the assistant.']]},
+    {id:'consortium',name:'Audience Before Product',essence:'Never launch to nobody. Build the warm audience and the book of supporters first — the consortium is the distribution, and distribution precedes the thing being distributed.',evidence:[['2026-10-02','Glenride Council convened as the prerequisite before any stablecoin-scale build — the Open USD lesson: “the consortium is the distribution.”'],['2026-10-02','Personal brand campaign in “Built in Public” format with an honest sequence: attention, then council/warm audience, then paid offers.'],['2026-10-02/04','WAVY pre-launch crew checklist and Harbor Pass; SpinWave “Run with Reynard” quest with ranks Curious to Kin of the Fox; advised against launching WAVY via X with no product behind it.']]},
+    {id:'wholeness',name:'Wholeness Over Piecemealing',essence:'Complete things; don\'t piecemeal them. His movement across projects is nonlinear but not abandonment — the portfolio is expected to be completed over time, every open loop eventually closed.',evidence:[['2026-09-29','First meeting: “we need more wholeness. We need to complete things not piecemeal them.”'],['2026-10-02','He describes his project movement as nonlinear rather than abandonment: ideas may appear to jump, “but this is how his mind works and he expects the portfolio to be completed over time.”'],['2026-10-02/05','SPIN salvage: “I made an error and launched a bankr token without all the proper pieces in place but I dot want to abandon it.” The dashboard and week planner were built to close the loop on tasks “spread out over a lot of projects.”']]}
+  ];
+  var edges=[
+    {from:'verify',to:'spells',label:'enforces',note:'You cannot cast a clean spell from a false premise — verification is how precision of intent is kept; “a confident wrong answer is a lie.”'},
+    {from:'spells',to:'provenance',label:'extends-to',note:'The same rule applied to creative work: his fox sketch is adopted exactly, never reinterpreted — voice is provenance.'},
+    {from:'consent',to:'human-gate',label:'grounds',note:'Free will is the philosophy; the human approval gate is the engineering — the operator\'s agency is why a human stays in the loop.',core:true},
+    {from:'human-gate',to:'own-ground',label:'requires',note:'A gate you do not own is a suggestion — approval-first control is only real on infrastructure you control (the warm-outbound hybrid draws this boundary explicitly).'},
+    {from:'own-ground',to:'consortium',label:'enables',note:'Owned pages, domains, and accounts (his Cloudflare, his lists) make audience-building independent of rented platforms.'},
+    {from:'verify',to:'consortium',label:'protects',note:'Checkable public claims — verdict first, caveats plain — are what make a warm audience trust him enough to follow.'},
+    {from:'wholeness',to:'freeze',label:'drives',note:'The completion drive is why every fork gets decided and every decision gets written down with zero unset lines.'},
+    {from:'freeze',to:'verify',label:'feeds',note:'Frozen specs give verification something to check against — you can only verify claims against a fixed target.'},
+    {from:'spells',to:'consent',label:'converges-with',note:'“Someone else\'s spell cast with your mouth that you never opted in is a curse” — the language rule and the consent rule are one insight in two domains.',core:true},
+    {from:'provenance',to:'consent',label:'expresses',note:'Never taking others\' content and never letting AI create platform accounts are consent applied to creative work and platform identity.'},
+    {from:'wholeness',to:'consortium',label:'demands',note:'Completion thinking surfaced the missing audience as the gap to fill — the council completes the machine before big builds.',interpretive:true},
+    {from:'human-gate',to:'spells',label:'enforces',note:'Approval queues and the no-profit-promise copy filter are where the word rules get enforced on machine output — closing the loop back to language.',core:true}
+  ];
+  var projects=[
+    {id:'homelab',name:'iMac Homelab + Local AI',phase:'Foundation',status:'Install blocked at boot media',milestone:'Working Omarchy host, LAN model access, reverse proxy baseline',target:'31 Oct 2026',confidence:'Medium',summary:'The physical foundation for owned models and self-hosted services. Hardware is known; the immediate problem is a likely corrupt Omarchy image.',next:['Verify the ISO file size and SHA-256 hash.','Recreate the installer from a known-good download and boot the iMac.','Restore Broadcom Wi-Fi and camera support, then verify Mac Studio model access over LAN.'],risks:['A second boot-media failure or iMac driver issue would move the date.','Ntfy, crawl4ai, and Postal are follow-on services, not part of this milestone.'],mechanisms:['own-ground','verify','wholeness']},
+    {id:'reynards',name:'Reynard’s Store',phase:'Launch',status:'Shopify storefront is pre-launch and password-locked',milestone:'Public storefront with a tight first catalog and working fulfillment path',target:'30 Nov 2026',confidence:'Medium',summary:'The commerce door of the personal brand and the near-term cash-generating arm. The visual identity exists; products, store policies, and the storefront lock still need resolution.',next:['Resolve the storefront password state.','Choose and quality-check the first product set.','Finish policy, fulfillment, and launch content pages.'],risks:['No product catalog has been frozen.','Vendor quality and fulfillment testing are outside the AI agents’ control.'],mechanisms:['provenance','freeze','consortium']},
+    {id:'factory',name:'Personal Content Factory',phase:'Validate',status:'Phase A scaffold built; hardware smoke test pending',milestone:'One owned video runs end-to-end through transcript, scoring, captions, 9:16 render, and human review',target:'15 Jan 2027',confidence:'Medium-high',summary:'A local pipeline that turns D’Vaughn’s own archive into approved clips. The code path exists; the unverified pieces are faster-whisper and Ollama performance on his hardware.',next:['Run and time one full smoke test.','Fix the first real-media failures and document the machine profile.','Freeze the review criteria and approve the first production render.'],risks:['The estimate assumes the smoke test exposes ordinary integration work, not a hardware blocker.','Publishing automation is intentionally excluded from Phase A.'],mechanisms:['provenance','human-gate','own-ground','verify']},
+    {id:'brand',name:'Independent Architect Gateway',phase:'Publish',status:'Positioning and campaign architecture are frozen; public surfaces are partial',milestone:'A coherent .com gateway and .org institution path with the sourced thesis and three clear doors',target:'28 Feb 2027',confidence:'Medium',summary:'The public narrative joining the personal brand, Glenride, research, partnership, and commerce without collapsing them into one undifferentiated site.',next:['Complete the thesis citation pass before publishing it as substantiated.','Freeze the replacement name for “The Sovereign Dispatch.”','Ship the gateway paths for join, partner, and fuel the research.'],risks:['The conference passage still needs D’Vaughn’s confirmation.','New brand concepts should not interrupt the frozen architecture.'],mechanisms:['spells','verify','freeze','consortium']},
+    {id:'borrowed-spell',name:'The Borrowed Spell',phase:'Publish',status:'Seven-part outline and 110-source index exist',milestone:'Fully drafted, citation-checked essay ready for publication',target:'31 Mar 2027',confidence:'Medium-high',summary:'The long-form argument for precision, consent, free will, and the danger of speaking someone else’s framing without opting in.',next:['Run the DOI and page-level verification pass on load-bearing sources.','Draft all seven sections from the approved outline.','Complete a voice, claim, and citation audit.'],risks:['Two source entries are incomplete.','The date assumes one revision cycle after the full draft.'],mechanisms:['spells','consent','verify','provenance']},
+    {id:'council',name:'Glenride Council',phase:'Convene',status:'Charter drafted; only one concrete invitee is named',milestone:'First completed quarterly roundtable with a real roster and documented outcomes',target:'31 May 2027',confidence:'Medium-low',summary:'The warm audience and book of supporters that should exist before the larger technology launches. Recruitment—not writing—is the critical path.',next:['Name the first cohort against the charter’s seat map.','Send and follow up on invitations.','Run the first session and publish a factual outcomes brief.'],risks:['External participants control the calendar.','The estimate assumes a small first table rather than a fully mature council.'],mechanisms:['consortium','human-gate','verify']},
+    {id:'grand-central',name:'Grand Central Terminal',phase:'Build',status:'Concept defined; build scope is still light',milestone:'Local v1 that discovers, launches, and reports health for D’Vaughn’s code repositories',target:'31 Jul 2027',confidence:'Medium-low',summary:'A Laravel launcher that turns the growing code portfolio into an operable station instead of a collection of disconnected repos.',next:['Inventory the repos and launch commands.','Freeze the v1 health/status contract.','Build one adapter path, then generalize only after it works.'],risks:['Repository diversity may expand the adapter surface.','Remote deployment management is excluded from v1.'],mechanisms:['own-ground','freeze','wholeness']},
+    {id:'launch-agent',name:'Launch Agent',phase:'Build',status:'Build-ready PRD exists; intake and code have not started',milestone:'Usable v1 for brand intake, content planning, launch operations, and read-only treasury monitoring',target:'31 Oct 2027',confidence:'Low-medium',summary:'Vertical marketing automation for crypto brands with non-custodial monitoring and human approval at every consequential step.',next:['Choose validation-first versus build-first.','Run the ten-question brand intake on one real project.','Build the smallest complete brand-to-approved-content loop.'],risks:['The friend/partner commitment is still unclear.','Platform APIs and crypto marketing rules may change the integration plan.'],mechanisms:['human-gate','verify','consortium','freeze']},
+    {id:'thinktank',name:'ThinkTank OS',phase:'Platform',status:'Management vision exists; the manuscript workflow is not yet a shipped product',milestone:'v1 for roadmaps, research records, manuscript intake, review state, and operator approvals',target:'31 Mar 2028',confidence:'Low',summary:'The operating layer for Glenride research and the eventual institutional home beneath the scholarly repository.',next:['Freeze the first user and first complete workflow.','Separate manuscript operations from general project management.','Build and test the smallest end-to-end review path.'],risks:['The current concept spans several products.','New research workflows can expand scope faster than agents can close it.'],mechanisms:['freeze','human-gate','own-ground','wholeness']},
+    {id:'spinwave',name:'SpinWave Scholarly Repository',phase:'Platform',status:'Token launched; utility spec frozen; repository product not built',milestone:'Private beta where approved scholars submit work and readers browse a licensed catalog',target:'31 Jul 2028',confidence:'Low',summary:'The non-gaming utility direction for SPIN: a Glenride scholarly manuscript and dataset repository. Token mechanics are not the product and do not remove the need for review, licensing, and anti-farming controls.',next:['Freeze reward schedules, license tiers, fee splits, and anti-farming rules.','Prototype the manuscript and dataset rights workflow inside ThinkTank OS.','Run a closed beta before attaching meaningful token incentives.'],risks:['Vesting release mechanics remain unconfirmed.','Legal, licensing, and token-incentive review can materially move the date.'],mechanisms:['provenance','human-gate','freeze','consortium']},
+    {id:'scalar',name:'SCALAR',phase:'Product',status:'Mobile fitness and micro-progression concept',milestone:'Private beta with one complete progression loop and usable personal tracking',target:'31 Oct 2028',confidence:'Low',summary:'A focused mobile fitness tracker built around small, compounding progression rather than a broad wellness platform.',next:['Define the single behavior loop and minimum metric set.','Decide whether any health connector is required for v1.','Prototype the loop before expanding the exercise catalog.'],risks:['There is no frozen PRD yet.','Health-data integration would add permission, privacy, and QA work.'],mechanisms:['wholeness','consent','verify']},
+    {id:'wavy',name:'WAVY Life-Ops Pilot',phase:'Long range',status:'Tokenomics and treasury structure are documented; product and counsel gates remain',milestone:'Closed pilot that maps linked funds and executes one allowlisted outcome after explicit confirmation',target:'30 Jun 2029',confidence:'Low',summary:'A consent-based private marketplace and life-operations layer. The pilot is intentionally narrower than the full vision and excludes autonomous movement, loans, and custody.',next:['Close the four remaining launch decisions and counsel review.','Prototype one read-only planning flow before any execution path.','Secure one real merchant path and test explicit confirmation end to end.'],risks:['Financial integrations, merchant agreements, and legal classification are external dependencies.','Launching the token before a working pilot would not count as completion.'],mechanisms:['consent','human-gate','verify','consortium']},
+    {id:'total-vision',name:'Total Vision',phase:'Provisional',status:'Authentication-platform concept; current product boundary is not recorded',milestone:'Provisional single-card-category triage alpha with mandatory human review',target:'31 Mar 2029',confidence:'Very low',summary:'Automated card authentication remains a named venture. This provisional date assumes a narrow photo-assisted triage tool, not authoritative grading, and only one card category in the first release.',next:['Choose the exact card category and the first authentication claim.','Define the human expert’s role and acceptable error policy.','Freeze the data and image-acquisition plan before model work.'],risks:['The estimate moves if v1 includes grading, pricing, multiple card games, or authoritative authentication.','The available record does not establish the input method, training data, or release boundary.'],mechanisms:['verify','human-gate','provenance']},
+    {id:'tandem',name:'Tandem',phase:'Provisional',status:'AI-filtered customer-service API concept',milestone:'Provisional text-only support pilot for one customer segment and one escalation queue',target:'30 Sep 2029',confidence:'Very low',summary:'The human-escalation principle is clear. This provisional date assumes one text channel, one customer type, and a narrow routing-and-drafting service rather than a general support platform.',next:['Name one customer segment and one support channel.','Define the escalation contract and what the AI may never decide.','Recruit one design partner before expanding the API.'],risks:['Voice, omnichannel support, autonomous refunds, or multiple customers would move the date.','The target customer and commercial model are not frozen.'],mechanisms:['human-gate','consent','freeze']},
+    {id:'house-xii',name:'HOUSE XII + Music',phase:'Provisional',status:'Artwork and multiple tracks are in progress',milestone:'Provisional release package: one mastered single, final cover, metadata, and distribution-ready files',target:'31 Dec 2026',confidence:'Low',summary:'The creative work is real. This estimate uses one single plus its visual package as the first finish line; it does not assume that an EP or album is complete.',next:['Choose the first single.','Freeze the mix/master and cover revision limits.','Prepare the metadata and release files.'],risks:['The date moves if “complete” means an EP, album, video, or multi-single campaign.','The release unit has not yet been confirmed.'],mechanisms:['provenance','freeze','wholeness']}
+  ];
+  var desktop={
+    'spells':[480,92],'verify':[160,158],'provenance':[760,162],'freeze':[292,308],'wholeness':[480,370],
+    'consent':[765,382],'consortium':[125,474],'human-gate':[610,585],'own-ground':[310,592]
+  };
+  var mobile={
+    'spells':[250,72],'verify':[110,205],'provenance':[390,205],'freeze':[110,385],'consent':[390,385],
+    'wholeness':[250,535],'consortium':[105,710],'human-gate':[395,710],'own-ground':[250,875]
+  };
+  var dLabels=[[316,104],[636,106],[665,552],[465,634],[180,624],[62,332],[194,354],[188,236],[681,237],[836,286],[194,518],[535,273]];
+  var mLabels=[[172,123],[327,123],[431,555],[330,815],[135,815],[57,470],[166,473],[73,290],[444,285],[448,300],[113,585],[319,418]];
+  var activeNode='spells',activeEdge=-1,isMobile=false,projectMode=false,selectedProject='';
+  var ns='http://www.w3.org/2000/svg';
+  function el(tag,attrs,text){var x=document.createElementNS(ns,tag);Object.keys(attrs||{}).forEach(function(k){x.setAttribute(k,attrs[k])});if(text!==undefined)x.textContent=text;return x}
+  function splitName(name){if(name.length<24)return [name];var words=name.split(' '),a='',b='';words.forEach(function(w){if((a+' '+w).trim().length<=22&&!b)a=(a+' '+w).trim();else b=(b+' '+w).trim()});return [a,b]}
+  function edgePath(a,b,i,mob){
+    var dx=b[0]-a[0],dy=b[1]-a[1],bend=0;
+    if(i===5)bend=-60;if(i===10)bend=55;if(i===11)bend=-95;if(i===8)bend=-40;
+    if(mob){if(i===5)bend=-45;if(i===10)bend=45;if(i===11)bend=-70}
+    var mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2, len=Math.sqrt(dx*dx+dy*dy)||1, nx=-dy/len,ny=dx/len;
+    var cx=mx+nx*bend,cy=my+ny*bend;
+    return 'M '+a[0]+' '+a[1]+' Q '+cx+' '+cy+' '+b[0]+' '+b[1];
+  }
+  function draw(){
+    isMobile=window.innerWidth<=680;var pos=isMobile?mobile:desktop;var svg=document.getElementById('diagram');svg.setAttribute('viewBox',isMobile?'0 0 500 950':'0 0 920 700');
+    var eg=document.getElementById('edges'),ng=document.getElementById('nodes'),hg=document.getElementById('hub');eg.innerHTML='';ng.innerHTML='';hg.innerHTML='';
+    if(!isMobile){hg.appendChild(el('circle',{cx:612,cy:345,r:238,class:'hub-ring'}));hg.appendChild(el('text',{x:612,y:337,class:'hub-title'},'LANGUAGE · AGENCY · CONTROL'));}
+    edges.forEach(function(e,i){var a=pos[e.from],b=pos[e.to],g=el('g',{class:'edge-group'+(e.core?' core':'')+(e.interpretive?' interpretive':'')+(activeEdge===i?' active':''),'data-edge':i,tabindex:'0',role:'button','aria-label':nodeBy(e.from).name+' '+e.label+' '+nodeBy(e.to).name});var d=edgePath(a,b,i,isMobile);g.appendChild(el('path',{d:d,class:'edge-path'+(e.core?' core':'')+(e.interpretive?' interpretive':'')}));g.appendChild(el('path',{d:d,class:'edge-hit'}));var lp=(isMobile?mLabels:dLabels)[i],w=Math.max(46,e.label.length*7+14);var lg=el('g',{class:'edge-label'});lg.appendChild(el('rect',{x:lp[0]-w/2,y:lp[1]-10,width:w,height:20}));lg.appendChild(el('text',{x:lp[0],y:lp[1]+1},e.label));g.appendChild(lg);g.addEventListener('click',function(){showEdge(i)});g.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();showEdge(i)}});eg.appendChild(g)});
+    nodes.forEach(function(n,i){
+      var p=pos[n.id],w=isMobile?146:164,h=isMobile?62:58,count=projects.filter(function(pr){return pr.mechanisms.indexOf(n.id)>-1}).length;
+      var selected=selectedProject?projectBy(selectedProject):null,matched=selected&&selected.mechanisms.indexOf(n.id)>-1;
+      var cls='node'+(['spells','consent','human-gate'].indexOf(n.id)>-1?' core':'')+(activeNode===n.id&&activeEdge<0?' active':'')+(projectMode&&selectedProject?(matched?' project-match':' project-dim'):'');
+      var g=el('g',{class:cls,transform:'translate('+(p[0]-w/2)+' '+(p[1]-h/2)+')',tabindex:'0',role:'button','aria-label':'Open '+n.name});
+      g.appendChild(el('rect',{width:w,height:h}));g.appendChild(el('text',{x:10,y:15,class:'index'},String(i+1).padStart(2,'0')));
+      var lines=splitName(n.name);lines.forEach(function(line,j){g.appendChild(el('text',{x:10,y:lines.length===1?39:34+j*16,class:'name'},line))});
+      if(projectMode){g.appendChild(el('circle',{cx:w-12,cy:12,r:8,class:'project-badge'}));g.appendChild(el('text',{x:w-12,y:12,class:'project-badge-text'},count));}
+      g.addEventListener('click',function(){showNode(n.id)});g.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();showNode(n.id)}});ng.appendChild(g)
+    });
+  }
+  function nodeBy(id){return nodes.filter(function(n){return n.id===id})[0]}
+  function projectBy(id){return projects.filter(function(p){return p.id===id})[0]}
+  function syncProjectUI(){
+    document.getElementById('projectTray').classList.toggle('active',projectMode);
+    Array.prototype.forEach.call(document.querySelectorAll('.project-chip,.project-card'),function(b){b.classList.toggle('active',b.getAttribute('data-project')===selectedProject)});
+  }
+  function showNode(id){activeNode=id;activeEdge=-1;var n=nodeBy(id),idx=nodes.indexOf(n);var html='<div class="detail-index">Mechanism '+String(idx+1).padStart(2,'0')+' / 09</div><h2>'+n.name+'</h2><p class="essence">'+n.essence+'</p><div class="rule"></div><h3>Dated evidence</h3><ol class="evidence">';n.evidence.forEach(function(ev){html+='<li><span class="date">'+ev[0]+'</span><span class="quote">'+ev[1]+'</span></li>'});html+='</ol>';document.getElementById('detail').innerHTML=html;draw();syncProjectUI();if(window.innerWidth<=1040)document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'})}
+  function showProject(id,scroll){
+    var p=projectBy(id);projectMode=true;selectedProject=id;activeNode='';activeEdge=-1;
+    var tags=p.mechanisms.map(function(mid){return '<span>'+nodeBy(mid).name+'</span>'}).join('');
+    var html='<div class="detail-index">Project overlay · '+p.phase+'</div><h2>'+p.name+'</h2><p class="essence">'+p.summary+'</p><div class="project-facts"><div><small>Current state</small><b>'+p.status+'</b></div><div><small>Completion milestone</small><b>'+p.milestone+'</b></div><div><small>Estimated target</small><b>'+p.target+'</b></div><div><small>Confidence</small><b>'+p.confidence+'</b></div></div><h3>Next moves</h3><ol class="detail-list">'+p.next.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol><div class="rule"></div><h3>Dependencies and caveats</h3><ul class="detail-list">'+p.risks.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul><div class="rule"></div><h3>Mechanisms exercised</h3><div class="mechanism-tags">'+tags+'</div>';
+    document.getElementById('detail').innerHTML=html;draw();syncProjectUI();if(scroll!==false)document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function showProjectOverview(){projectMode=true;selectedProject='';activeNode='';activeEdge=-1;document.getElementById('detail').innerHTML='<div class="detail-index">Project overlay / 15</div><h2>The founder is the bottleneck by design.</h2><p class="essence">AI agents can parallelize research, drafting, coding, and verification, but D’Vaughn still owns scope, approvals, integration, live testing, relationships, and every consequential action. The sequence therefore protects one primary build and one lighter track instead of pretending fifteen projects can all finish at once.</p><div class="rule"></div><h3>Forecast shape</h3><p class="edge-note"><strong>Foundation → publishing → audience → products → regulated systems.</strong><br><br>All fifteen projects receive milestone dates. Total Vision, Tandem, and HOUSE XII are explicitly provisional: each date depends on the narrow release boundary stated in its detail view.</p>';draw();syncProjectUI()}
+  function showEdge(i){activeEdge=i;activeNode='';var e=edges[i];var html='<div class="detail-index">Relationship '+String(i+1).padStart(2,'0')+' / 12</div><h2>'+nodeBy(e.from).name+' <span style="color:var(--accent)">→</span> '+nodeBy(e.to).name+'</h2><h3>Relation</h3><p class="essence" style="font-family:IBM Plex Mono,monospace;color:var(--blue)">'+e.label+'</p><p class="edge-note">'+e.note+'</p>'+(e.interpretive?'<div class="caveat"><strong>Interpretive link.</strong> This relation is the analyst\'s synthesis, not D\'Vaughn\'s stated reasoning.</div>':'');document.getElementById('detail').innerHTML=html;draw();if(window.innerWidth<=1040)document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'})}
+  function showOverview(){projectMode=false;selectedProject='';activeNode='';activeEdge=-1;document.getElementById('detail').innerHTML='<div class="detail-index">System / 01</div><h2>The machine protects choice.</h2><p class="essence">The nine mechanisms are not separate projects. They are one operating system: truth disciplines language; language and consent define agency; human approval preserves control; owned infrastructure makes that control real; provenance, frozen decisions, audience sequencing and completion keep the machine aligned over time.</p><div class="rule"></div><h3>The closed loop</h3><p class="edge-note"><strong>Words Are Spells → Consent Is Architectural → Approval-First → Words Are Spells.</strong><br><br>Language names the intent. Consent authorizes it. Human approval controls execution. The output returns to language for review.</p>';draw();syncProjectUI()}
+  function buildList(){var list=document.getElementById('mechanismList');nodes.forEach(function(n,i){var b=document.createElement('button');b.type='button';b.innerHTML='<small>'+String(i+1).padStart(2,'0')+' / MECHANISM</small><b>'+n.name+'</b>';b.addEventListener('click',function(){showNode(n.id)});list.appendChild(b)})}
+  function buildProjects(){
+    var tray=document.getElementById('projectTray'),grid=document.getElementById('portfolioGrid');
+    projects.slice().sort(function(a,b){return new Date(a.target)-new Date(b.target)}).forEach(function(p){
+      var chip=document.createElement('button');chip.type='button';chip.className='project-chip';chip.setAttribute('data-project',p.id);chip.textContent=p.name;chip.addEventListener('click',function(){showProject(p.id,true)});tray.appendChild(chip);
+      var card=document.createElement('button');card.type='button';card.className='project-card'+(p.target==='Scope required'?' unscheduled':'');card.setAttribute('data-project',p.id);card.innerHTML='<span class="phase">'+p.phase+' · '+p.confidence+' confidence</span><h3>'+p.name+'</h3><p>'+p.status+'</p><div class="target"><span>'+p.milestone+'</span><span>'+p.target+'</span></div>';card.addEventListener('click',function(){showProject(p.id,true)});grid.appendChild(card);
+    });
+  }
+  document.getElementById('overviewBtn').addEventListener('click',showOverview);
+  document.getElementById('projectsBtn').addEventListener('click',showProjectOverview);
+  document.getElementById('nextBtn').addEventListener('click',function(){if(projectMode){var pi=Math.max(-1,projects.findIndex(function(p){return p.id===selectedProject}));showProject(projects[(pi+1)%projects.length].id,false)}else{var idx=Math.max(0,nodes.findIndex(function(n){return n.id===activeNode}));showNode(nodes[(idx+1)%nodes.length].id)}});
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(draw,120)});
+  buildList();buildProjects();draw();showOverview();
+})();
+</script>
+</body>
+</html>

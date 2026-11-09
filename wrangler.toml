@@ -1,0 +1,14 @@
+name = "glenride-system-map-api"
+main = "worker/src/index.js"
+compatibility_date = "2026-11-08"
+# Keep the workers.dev URL alive: the Pages SPA calls
+# https://glenride-system-map-api.<subdomain>.workers.dev directly.
+workers_dev = true
+
+[[d1_databases]]
+binding = "SYSMAP_DB"
+# SHARED database with the Glenride HQ app (account hit the 10-database
+# system limit; no new D1 database can be created). This app owns ONLY
+# the sysmap_* tables and must never touch any hq_* table.
+database_name = "glenride-hq"
+database_id = "0d78cc19-3b11-4f39-805e-c061524cab2f"
