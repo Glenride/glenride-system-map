@@ -12,7 +12,7 @@
 //   updatebudgetstage, updatehierarchycard, updateorganization
 
 const ALLOWED_ORIGINS = [
-  "https://map.dvaughnhouse.org",
+  "https://map.dvaughnhouse.com",
   "https://glenride-system-map.pages.dev",
   "http://localhost:8787",
   "http://localhost:8080",

@@ -1,7 +1,7 @@
 # Glenride System Map — standalone rebuild
 
 Independent rebuild of the Muse `glenride-system-map` artifact, live at
-**https://map.dvaughnhouse.org**. The Muse original stays live and untouched;
+**https://map.dvaughnhouse.com**. The Muse original stays live and untouched;
 this is a rebuild, not a migration.
 
 ## Hosting
@@ -9,7 +9,8 @@ this is a rebuild, not a migration.
 - **Worker** `glenride-system-map-api` — API + password gate, `workers_dev = true`.
   The SPA calls it at its `*.workers.dev` URL (see `public/config.js`).
 - **Pages** `glenride-system-map` — static SPA frontend, custom domain
-  `map.dvaughnhouse.org` (Pages creates the DNS).
+  `map.dvaughnhouse.com` (DNS is a proxied CNAME to
+  `glenride-system-map.pages.dev` in the dvaughnhouse.com zone).
 - **D1** shared database `glenride-hq` (`0d78cc19-3b11-4f39-805e-c061524cab2f`) —
   the account hit the 10-database system limit, so no new D1 database could be
   created. This app owns ONLY the `sysmap_*` tables and never touches `hq_*`
